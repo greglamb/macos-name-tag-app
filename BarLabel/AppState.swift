@@ -6,6 +6,10 @@ final class AppState: ObservableObject {
 
     @Published var customLabel: String? {
         didSet {
+            if let label = customLabel, label.trimmingCharacters(in: .whitespaces).isEmpty {
+                customLabel = nil
+                return
+            }
             if let customLabel {
                 UserDefaults.standard.set(customLabel, forKey: Self.customLabelKey)
             } else {
