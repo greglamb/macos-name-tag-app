@@ -9,7 +9,7 @@ cask "name-tag" do
 
   depends_on macos: ">= :ventura"
 
-  app "Name Tag.app"
+  app "NameTag.app"
 
   zap trash: [
     "~/Library/Preferences/com.nametag.app.plist",

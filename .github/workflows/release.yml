@@ -35,7 +35,7 @@ jobs:
 
       - name: Create DMG
         run: |
-          APP_PATH="build/Build/Products/Release/Name Tag.app"
+          APP_PATH="build/Build/Products/Release/NameTag.app"
           DMG_PATH="NameTag.dmg"
 
           # Create a temporary directory for DMG contents
