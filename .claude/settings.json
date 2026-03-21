@@ -2,6 +2,62 @@
   "skills": {
     "swiftui-pro": {
       "path": ".claude/skills/swiftui-pro"
+    },
+    "using-superpowers": {
+      "path": ".claude/skills/using-superpowers"
+    },
+    "brainstorming": {
+      "path": ".claude/skills/brainstorming"
+    },
+    "writing-plans": {
+      "path": ".claude/skills/writing-plans"
+    },
+    "executing-plans": {
+      "path": ".claude/skills/executing-plans"
+    },
+    "test-driven-development": {
+      "path": ".claude/skills/test-driven-development"
+    },
+    "systematic-debugging": {
+      "path": ".claude/skills/systematic-debugging"
+    },
+    "requesting-code-review": {
+      "path": ".claude/skills/requesting-code-review"
+    },
+    "receiving-code-review": {
+      "path": ".claude/skills/receiving-code-review"
+    },
+    "verification-before-completion": {
+      "path": ".claude/skills/verification-before-completion"
+    },
+    "finishing-a-development-branch": {
+      "path": ".claude/skills/finishing-a-development-branch"
+    },
+    "subagent-driven-development": {
+      "path": ".claude/skills/subagent-driven-development"
+    },
+    "dispatching-parallel-agents": {
+      "path": ".claude/skills/dispatching-parallel-agents"
+    },
+    "using-git-worktrees": {
+      "path": ".claude/skills/using-git-worktrees"
+    },
+    "writing-skills": {
+      "path": ".claude/skills/writing-skills"
     }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
+            "async": false
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Release
+        run: |
+          xcodebuild \
+            -project NameTag.xcodeproj \
+            -scheme NameTag \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            MARKETING_VERSION=${{ steps.version.outputs.version }} \
+            build
+
+      - name: Create DMG
+        run: |
+          APP_PATH="build/Build/Products/Release/NameTag.app"
+          DMG_PATH="NameTag.dmg"
+
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg_contents
+          cp -R "$APP_PATH" dmg_contents/
+
+          # Create a symlink to Applications for drag-install
+          ln -s /Applications dmg_contents/Applications
+
+          # Create the DMG
+          hdiutil create \
+            -volname "Name Tag" \
+            -srcfolder dmg_contents \
+            -ov \
+            -format UDZO \
+            "$DMG_PATH"
+
+          # Print SHA256 for Homebrew cask
+          echo "SHA256:"
+          shasum -a 256 "$DMG_PATH"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: NameTag.dmg
+          generate_release_notes: true
+          draft: false
+          prerelease: false
