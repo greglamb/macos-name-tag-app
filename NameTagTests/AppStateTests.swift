@@ -1,139 +1,124 @@
-import XCTest
+import Foundation
+import Testing
 import Combine
 @testable import NameTag
 
 @MainActor
-final class AppStateTests: XCTestCase {
-    private var defaults: UserDefaults!
-    private var cancellables: Set<AnyCancellable>!
+struct AppStateTests {
+    private let defaults: UserDefaults
+    private var cancellables: Set<AnyCancellable> = []
 
-    override func setUp() {
-        super.setUp()
-        defaults = UserDefaults(suiteName: "com.nametag.tests")!
-        defaults.removePersistentDomain(forName: "com.nametag.tests")
-        cancellables = []
-    }
-
-    override func tearDown() {
-        defaults.removePersistentDomain(forName: "com.nametag.tests")
-        defaults = nil
-        cancellables = nil
-        super.tearDown()
+    init() {
+        let suite = "suite-\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
     }
 
     // MARK: - Initial State
 
-    func testDefaultStateUsesHostname() {
+    @Test func defaultStateUsesHostname() {
         let state = AppState(defaults: defaults)
 
-        XCTAssertNil(state.customLabel)
-        XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
+        #expect(state.customLabel == nil)
+        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
     }
 
-    func testInitLoadsExistingCustomLabel() {
+    @Test func initLoadsExistingCustomLabel() {
         defaults.set("My Mac", forKey: AppState.customLabelKey)
 
         let state = AppState(defaults: defaults)
 
-        XCTAssertEqual(state.customLabel, "My Mac")
-        XCTAssertEqual(state.displayLabel, "My Mac")
+        #expect(state.customLabel == "My Mac")
+        #expect(state.displayLabel == "My Mac")
     }
 
     // MARK: - Setting Custom Label
 
-    func testSetCustomLabelUpdatesDisplayLabel() {
+    @Test func setCustomLabelUpdatesDisplayLabel() {
         let state = AppState(defaults: defaults)
 
         state.setLabel("Work Laptop")
 
-        XCTAssertEqual(state.displayLabel, "Work Laptop")
+        #expect(state.displayLabel == "Work Laptop")
     }
 
-    func testSetCustomLabelPersistsToDefaults() {
+    @Test func setCustomLabelPersistsToDefaults() {
         let state = AppState(defaults: defaults)
 
         state.setLabel("Office Mac")
 
-        XCTAssertEqual(defaults.string(forKey: AppState.customLabelKey), "Office Mac")
+        #expect(defaults.string(forKey: AppState.customLabelKey) == "Office Mac")
     }
 
-    func testChangeCustomLabelUpdatesDefaults() {
+    @Test func changeCustomLabelUpdatesDefaults() {
         let state = AppState(defaults: defaults)
 
         state.setLabel("First")
         state.setLabel("Second")
 
-        XCTAssertEqual(defaults.string(forKey: AppState.customLabelKey), "Second")
-        XCTAssertEqual(state.displayLabel, "Second")
+        #expect(defaults.string(forKey: AppState.customLabelKey) == "Second")
+        #expect(state.displayLabel == "Second")
     }
 
     // MARK: - Reset to Hostname
 
-    func testResetToHostnameClearsCustomLabel() {
+    @Test func resetToHostnameClearsCustomLabel() {
         let state = AppState(defaults: defaults)
         state.setLabel("Custom")
 
         state.resetToHostname()
 
-        XCTAssertNil(state.customLabel)
-        XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
+        #expect(state.customLabel == nil)
+        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
     }
 
-    func testResetToHostnameRemovesFromDefaults() {
+    @Test func resetToHostnameRemovesFromDefaults() {
         let state = AppState(defaults: defaults)
         state.setLabel("Custom")
 
         state.resetToHostname()
 
-        XCTAssertNil(defaults.string(forKey: AppState.customLabelKey))
+        #expect(defaults.string(forKey: AppState.customLabelKey) == nil)
     }
 
     // MARK: - Empty String Handling
 
-    func testEmptyStringNormalizesToNil() {
+    @Test(arguments: ["", "   ", "\t", "\n"])
+    func blankStringNormalizesToNil(input: String) {
         let state = AppState(defaults: defaults)
 
-        state.setLabel("")
+        state.setLabel(input)
 
-        XCTAssertNil(state.customLabel)
-        XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
+        #expect(state.customLabel == nil)
+        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
     }
 
-    func testWhitespaceOnlyStringNormalizesToNil() {
-        let state = AppState(defaults: defaults)
-
-        state.setLabel("   ")
-
-        XCTAssertNil(state.customLabel)
-        XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
-    }
-
-    func testEmptyStringRemovesFromDefaults() {
+    @Test func blankStringRemovesFromDefaults() {
         let state = AppState(defaults: defaults)
         state.setLabel("Was Set")
 
         state.setLabel("")
 
-        XCTAssertNil(defaults.string(forKey: AppState.customLabelKey))
+        #expect(defaults.string(forKey: AppState.customLabelKey) == nil)
     }
 
     // MARK: - Combine Publishing
 
-    func testCustomLabelPublishesChanges() {
+    @Test mutating func customLabelPublishesChanges() {
         let state = AppState(defaults: defaults)
         var receivedValues: [String?] = []
 
         state.$customLabel
-            .dropFirst() // skip initial value
+            .dropFirst()
             .sink { receivedValues.append($0) }
             .store(in: &cancellables)
 
         state.setLabel("Test")
 
-        XCTAssertEqual(receivedValues, ["Test"])
+        #expect(receivedValues == ["Test"])
     }
 
-    func testResetToHostnamePublishesNil() {
+    @Test mutating func resetToHostnamePublishesNil() {
         let state = AppState(defaults: defaults)
         state.setLabel("Before")
         var receivedValues: [String?] = []
@@ -145,29 +130,29 @@ final class AppStateTests: XCTestCase {
 
         state.resetToHostname()
 
-        XCTAssertEqual(receivedValues, [nil])
+        #expect(receivedValues == [nil])
     }
 
     // MARK: - Persistence Round-Trip
 
-    func testPersistenceRoundTrip() {
+    @Test func persistenceRoundTrip() {
         let state1 = AppState(defaults: defaults)
         state1.setLabel("Persisted Label")
 
         let state2 = AppState(defaults: defaults)
 
-        XCTAssertEqual(state2.customLabel, "Persisted Label")
-        XCTAssertEqual(state2.displayLabel, "Persisted Label")
+        #expect(state2.customLabel == "Persisted Label")
+        #expect(state2.displayLabel == "Persisted Label")
     }
 
-    func testPersistenceRoundTripAfterReset() {
+    @Test func persistenceRoundTripAfterReset() {
         let state1 = AppState(defaults: defaults)
         state1.setLabel("Temp")
         state1.resetToHostname()
 
         let state2 = AppState(defaults: defaults)
 
-        XCTAssertNil(state2.customLabel)
-        XCTAssertEqual(state2.displayLabel, ProcessInfo.processInfo.hostName)
+        #expect(state2.customLabel == nil)
+        #expect(state2.displayLabel == ProcessInfo.processInfo.hostName)
     }
 }

@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
     }
 
     func setLabel(_ label: String?) {
-        let normalized = label?.trimmingCharacters(in: .whitespaces)
+        let normalized = label?.trimmingCharacters(in: .whitespacesAndNewlines)
         let value = (normalized?.isEmpty ?? true) ? nil : normalized
 
         customLabel = value
