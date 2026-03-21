@@ -2,7 +2,9 @@ import Foundation
 import Combine
 
 final class AppState: ObservableObject {
-    private static let customLabelKey = "customLabel"
+    static let customLabelKey = "customLabel"
+
+    private let defaults: UserDefaults
 
     @Published var customLabel: String? {
         didSet {
@@ -11,9 +13,9 @@ final class AppState: ObservableObject {
                 return
             }
             if let customLabel {
-                UserDefaults.standard.set(customLabel, forKey: Self.customLabelKey)
+                defaults.set(customLabel, forKey: Self.customLabelKey)
             } else {
-                UserDefaults.standard.removeObject(forKey: Self.customLabelKey)
+                defaults.removeObject(forKey: Self.customLabelKey)
             }
         }
     }
@@ -22,8 +24,9 @@ final class AppState: ObservableObject {
         customLabel ?? ProcessInfo.processInfo.hostName
     }
 
-    init() {
-        self.customLabel = UserDefaults.standard.string(forKey: Self.customLabelKey)
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        self.customLabel = defaults.string(forKey: Self.customLabelKey)
     }
 
     func resetToHostname() {

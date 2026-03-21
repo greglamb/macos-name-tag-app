@@ -1,4 +1,4 @@
-name: Build
+name: Build & Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -20,14 +20,25 @@ jobs:
           xcodebuild \
             -project NameTag.xcodeproj \
             -scheme NameTag \
-            -configuration Release \
+            -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             build
 
+      - name: Run Tests
+        run: |
+          xcodebuild \
+            -project NameTag.xcodeproj \
+            -scheme NameTag \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            test
+
       - name: Verify app bundle
         run: |
-          APP_PATH="build/Build/Products/Release/Name Tag.app"
+          APP_PATH="build/Build/Products/Debug/NameTag.app"
           test -d "$APP_PATH" || { echo "App bundle not found"; exit 1; }
           echo "Build successful: $APP_PATH"
