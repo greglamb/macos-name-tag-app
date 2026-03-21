@@ -2,6 +2,7 @@ import AppKit
 import Combine
 import ServiceManagement
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let appState = AppState()
@@ -58,7 +59,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 try SMAppService.mainApp.register()
             }
         } catch {
-            print("Login item toggle failed: \(error)")
+            let alert = NSAlert()
+            alert.messageText = "Login Item Error"
+            alert.informativeText = "Could not update login item: \(error.localizedDescription)"
+            alert.alertStyle = .warning
+            alert.runModal()
         }
         updateLoginCheckmark()
     }

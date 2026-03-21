@@ -11,7 +11,7 @@ struct OptionsView: View {
             Text("Display Label:")
                 .font(.headline)
 
-            TextField("Enter label", text: $labelText)
+            TextField("Hostname", text: $labelText)
                 .textFieldStyle(.roundedBorder)
 
             HStack {
@@ -28,7 +28,7 @@ struct OptionsView: View {
                 .keyboardShortcut(.cancelAction)
 
                 Button("Save") {
-                    appState.customLabel = labelText
+                    appState.setLabel(labelText)
                     onDismiss()
                 }
                 .keyboardShortcut(.defaultAction)
@@ -37,7 +37,7 @@ struct OptionsView: View {
         .padding(20)
         .frame(width: 350)
         .onAppear {
-            labelText = appState.displayLabel
+            labelText = appState.customLabel ?? ""
         }
     }
 }

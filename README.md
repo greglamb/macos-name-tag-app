@@ -35,7 +35,7 @@ brew install --cask greglamb/tap/name-tag
 ### Manual
 
 1. Download `NameTag.dmg` from the [latest release](https://github.com/greglamb/macos-name-tag-app/releases/latest)
-2. Open the DMG and drag **Name Tag.app** to your Applications folder
+2. Open the DMG and drag **NameTag.app** to your Applications folder
 3. Launch Name Tag from Applications
 
 ## Usage

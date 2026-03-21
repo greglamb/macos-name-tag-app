@@ -12,7 +12,7 @@ final class OptionsWindowController {
     func showOptionsPanel() {
         if let panel, panel.isVisible {
             panel.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
+            activateApp()
             return
         }
 
@@ -35,8 +35,16 @@ final class OptionsWindowController {
         panel.contentViewController = hostingController
         panel.center()
         panel.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        activateApp()
 
         self.panel = panel
+    }
+
+    private func activateApp() {
+        if #available(macOS 14.0, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 }

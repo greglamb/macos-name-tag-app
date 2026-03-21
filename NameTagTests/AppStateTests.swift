@@ -2,6 +2,7 @@ import XCTest
 import Combine
 @testable import NameTag
 
+@MainActor
 final class AppStateTests: XCTestCase {
     private var defaults: UserDefaults!
     private var cancellables: Set<AnyCancellable>!
@@ -43,7 +44,7 @@ final class AppStateTests: XCTestCase {
     func testSetCustomLabelUpdatesDisplayLabel() {
         let state = AppState(defaults: defaults)
 
-        state.customLabel = "Work Laptop"
+        state.setLabel("Work Laptop")
 
         XCTAssertEqual(state.displayLabel, "Work Laptop")
     }
@@ -51,7 +52,7 @@ final class AppStateTests: XCTestCase {
     func testSetCustomLabelPersistsToDefaults() {
         let state = AppState(defaults: defaults)
 
-        state.customLabel = "Office Mac"
+        state.setLabel("Office Mac")
 
         XCTAssertEqual(defaults.string(forKey: AppState.customLabelKey), "Office Mac")
     }
@@ -59,8 +60,8 @@ final class AppStateTests: XCTestCase {
     func testChangeCustomLabelUpdatesDefaults() {
         let state = AppState(defaults: defaults)
 
-        state.customLabel = "First"
-        state.customLabel = "Second"
+        state.setLabel("First")
+        state.setLabel("Second")
 
         XCTAssertEqual(defaults.string(forKey: AppState.customLabelKey), "Second")
         XCTAssertEqual(state.displayLabel, "Second")
@@ -70,7 +71,7 @@ final class AppStateTests: XCTestCase {
 
     func testResetToHostnameClearsCustomLabel() {
         let state = AppState(defaults: defaults)
-        state.customLabel = "Custom"
+        state.setLabel("Custom")
 
         state.resetToHostname()
 
@@ -80,7 +81,7 @@ final class AppStateTests: XCTestCase {
 
     func testResetToHostnameRemovesFromDefaults() {
         let state = AppState(defaults: defaults)
-        state.customLabel = "Custom"
+        state.setLabel("Custom")
 
         state.resetToHostname()
 
@@ -92,7 +93,7 @@ final class AppStateTests: XCTestCase {
     func testEmptyStringNormalizesToNil() {
         let state = AppState(defaults: defaults)
 
-        state.customLabel = ""
+        state.setLabel("")
 
         XCTAssertNil(state.customLabel)
         XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
@@ -101,7 +102,7 @@ final class AppStateTests: XCTestCase {
     func testWhitespaceOnlyStringNormalizesToNil() {
         let state = AppState(defaults: defaults)
 
-        state.customLabel = "   "
+        state.setLabel("   ")
 
         XCTAssertNil(state.customLabel)
         XCTAssertEqual(state.displayLabel, ProcessInfo.processInfo.hostName)
@@ -109,9 +110,9 @@ final class AppStateTests: XCTestCase {
 
     func testEmptyStringRemovesFromDefaults() {
         let state = AppState(defaults: defaults)
-        state.customLabel = "Was Set"
+        state.setLabel("Was Set")
 
-        state.customLabel = ""
+        state.setLabel("")
 
         XCTAssertNil(defaults.string(forKey: AppState.customLabelKey))
     }
@@ -127,14 +128,14 @@ final class AppStateTests: XCTestCase {
             .sink { receivedValues.append($0) }
             .store(in: &cancellables)
 
-        state.customLabel = "Test"
+        state.setLabel("Test")
 
         XCTAssertEqual(receivedValues, ["Test"])
     }
 
     func testResetToHostnamePublishesNil() {
         let state = AppState(defaults: defaults)
-        state.customLabel = "Before"
+        state.setLabel("Before")
         var receivedValues: [String?] = []
 
         state.$customLabel
@@ -151,7 +152,7 @@ final class AppStateTests: XCTestCase {
 
     func testPersistenceRoundTrip() {
         let state1 = AppState(defaults: defaults)
-        state1.customLabel = "Persisted Label"
+        state1.setLabel("Persisted Label")
 
         let state2 = AppState(defaults: defaults)
 
@@ -161,7 +162,7 @@ final class AppStateTests: XCTestCase {
 
     func testPersistenceRoundTripAfterReset() {
         let state1 = AppState(defaults: defaults)
-        state1.customLabel = "Temp"
+        state1.setLabel("Temp")
         state1.resetToHostname()
 
         let state2 = AppState(defaults: defaults)
