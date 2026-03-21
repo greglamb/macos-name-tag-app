@@ -34,7 +34,7 @@ brew install --cask greglamb/tap/name-tag
 
 ### Manual
 
-1. Download `NameTag.dmg` from the [latest release](https://github.com/greglamb/macos-bar-label/releases/latest)
+1. Download `NameTag.dmg` from the [latest release](https://github.com/greglamb/macos-name-tag-app/releases/latest)
 2. Open the DMG and drag **Name Tag.app** to your Applications folder
 3. Launch Name Tag from Applications
 
@@ -59,8 +59,8 @@ Your custom label is saved automatically and persists across restarts.
 ### Build
 
 ```bash
-git clone https://github.com/greglamb/macos-bar-label.git
-cd macos-bar-label
+git clone https://github.com/greglamb/macos-name-tag-app.git
+cd macos-name-tag-app
 xcodebuild -project NameTag.xcodeproj -scheme NameTag -configuration Release build
 ```
 
