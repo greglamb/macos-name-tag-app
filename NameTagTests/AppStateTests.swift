@@ -20,7 +20,7 @@ struct AppStateTests {
         let state = AppState(defaults: defaults)
 
         #expect(state.customLabel == nil)
-        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
+        #expect(state.displayLabel == AppState.hostname)
     }
 
     @Test func initLoadsExistingCustomLabel() {
@@ -69,7 +69,7 @@ struct AppStateTests {
         state.resetToHostname()
 
         #expect(state.customLabel == nil)
-        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
+        #expect(state.displayLabel == AppState.hostname)
     }
 
     @Test func resetToHostnameRemovesFromDefaults() {
@@ -90,7 +90,7 @@ struct AppStateTests {
         state.setLabel(input)
 
         #expect(state.customLabel == nil)
-        #expect(state.displayLabel == ProcessInfo.processInfo.hostName)
+        #expect(state.displayLabel == AppState.hostname)
     }
 
     @Test func blankStringRemovesFromDefaults() {
@@ -153,6 +153,6 @@ struct AppStateTests {
         let state2 = AppState(defaults: defaults)
 
         #expect(state2.customLabel == nil)
-        #expect(state2.displayLabel == ProcessInfo.processInfo.hostName)
+        #expect(state2.displayLabel == AppState.hostname)
     }
 }

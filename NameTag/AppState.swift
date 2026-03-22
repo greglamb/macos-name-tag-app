@@ -9,8 +9,12 @@ final class AppState: ObservableObject {
 
     @Published private(set) var customLabel: String?
 
+    static var hostname: String {
+        Host.current().localizedName ?? ProcessInfo.processInfo.hostName
+    }
+
     var displayLabel: String {
-        customLabel ?? ProcessInfo.processInfo.hostName
+        customLabel ?? Self.hostname
     }
 
     init(defaults: UserDefaults = .standard) {
