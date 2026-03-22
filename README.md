@@ -29,7 +29,7 @@ Name Tag sits in your menu bar and shows a text label. By default it displays yo
 ### Homebrew (recommended)
 
 ```bash
-brew install --cask --no-quarantine greglamb/tap/name-tag
+brew install --cask greglamb/tap/name-tag
 ```
 
 ### Manual
