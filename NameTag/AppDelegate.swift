@@ -38,6 +38,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         optionsItem.target = self
         menu.addItem(optionsItem)
 
+        let refreshItem = NSMenuItem(title: "Refresh Hostname", action: #selector(refreshHostname), keyEquivalent: "")
+        refreshItem.target = self
+        menu.addItem(refreshItem)
+
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
@@ -66,6 +70,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             alert.runModal()
         }
         updateLoginCheckmark()
+    }
+
+    @objc private func refreshHostname() {
+        statusItem.button?.title = appState.displayLabel
     }
 
     @objc private func openOptions() {
