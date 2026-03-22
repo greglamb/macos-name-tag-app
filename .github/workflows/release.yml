@@ -64,6 +64,8 @@ jobs:
             CODE_SIGNING_REQUIRED=YES \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            ENABLE_HARDENED_RUNTIME=YES \
+            OTHER_CODE_SIGN_FLAGS="--timestamp --options runtime" \
             MARKETING_VERSION=${{ steps.version.outputs.version }} \
             build
 
@@ -79,11 +81,28 @@ jobs:
           ditto -c -k --keepParent "$APP_PATH" NameTag.zip
 
           # Submit for notarization
-          xcrun notarytool submit NameTag.zip \
+          SUBMISSION_ID=$(xcrun notarytool submit NameTag.zip \
             --apple-id "$APPLE_ID" \
             --password "$APP_SPECIFIC_PASSWORD" \
             --team-id "$APPLE_TEAM_ID" \
-            --wait
+            --wait \
+            --output-format json | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+
+          # Check status and fetch log on failure
+          STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+            --apple-id "$APPLE_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --output-format json | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "::error::Notarization failed with status: $STATUS"
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$APPLE_ID" \
+              --password "$APP_SPECIFIC_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID"
+            exit 1
+          fi
 
           # Staple the notarization ticket to the app
           xcrun stapler staple "$APP_PATH"
@@ -109,7 +128,7 @@ jobs:
             "$DMG_PATH"
 
           # Sign the DMG
-          codesign --force --sign "Developer ID Application" "$DMG_PATH"
+          codesign --force --sign "Developer ID Application" --timestamp "$DMG_PATH"
 
           # Print SHA256 for Homebrew cask
           echo "SHA256:"
